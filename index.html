@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2f7d6d">
+<meta name="description" content="Zina's Days: IBS food and symptom log">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<script>window.FOOD_API='api/check-food';</script>
+<style>
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<title>Zina's Days</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap">
+<style>
+/* Layout: one calm column, app-style tabs pinned at the bottom like a phone app; flips fully for Arabic */
+:root{
+  --bg:#f3f6f4; --surface:#ffffff; --ink:#1d2b27; --muted:#5d6d68; --line:#dbe4e0;
+  --accent:#2f7d6d; --accent-soft:#dcefe9; --plum:#7a4a78;
+  --good:#2f8a4f; --good-bg:#e1f3e7; --mid:#a8740f; --mid-bg:#fbf0d6; --bad:#b3413a; --bad-bg:#f9e2df;
+  --display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+:root[lang="ar"]{--display:"IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif; --body:"IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121916; --surface:#1b2420; --ink:#e4ece8; --muted:#9db0a9; --line:#2c3833;
+  --accent:#6cc3ad; --accent-soft:#1f3a33; --plum:#d0a0cd;
+  --good:#7fd29a; --good-bg:#1b3324; --mid:#e8bf62; --mid-bg:#3a2f15; --bad:#f09088; --bad-bg:#3d201d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121916; --surface:#1b2420; --ink:#e4ece8; --muted:#9db0a9; --line:#2c3833;
+  --accent:#6cc3ad; --accent-soft:#1f3a33; --plum:#d0a0cd;
+  --good:#7fd29a; --good-bg:#1b3324; --mid:#e8bf62; --mid-bg:#3a2f15; --bad:#f09088; --bad-bg:#3d201d; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55}
+main{max-width:620px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 110px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.2}
+h1{font-size:2rem;font-weight:700;letter-spacing:-.01em}
+:root[lang="ar"] h1{letter-spacing:0}
+h2{font-size:1.35rem;font-weight:700}
+h3{font-size:1.05rem;font-weight:500}
+:root[lang="ar"] h3{font-weight:700}
+p{margin:0}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.top>div:first-child{min-width:0;flex:1 1 220px}
+.lede{color:var(--muted);margin-top:6px}
+.eyebrow{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600}
+:root[lang="ar"] .eyebrow{letter-spacing:0;font-size:.85rem}
+.langs{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--surface);gap:2px}
+.langs button{font:inherit;font-size:.85rem;font-weight:600;border:0;background:none;color:var(--muted);border-radius:999px;padding:6px 12px;cursor:pointer;min-width:44px}
+.langs button[lang="ar"]{font-family:"IBM Plex Sans Arabic",Tahoma,sans-serif}
+.langs button[aria-pressed="true"]{background:var(--accent);color:var(--surface)}
+section{display:flex;flex-direction:column;gap:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.q{font-weight:600;font-size:.95rem;display:block;margin-bottom:6px}
+.hint{font-size:.85rem;color:var(--muted)}
+input[type=text],textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+textarea{min-height:64px;resize:vertical}
+input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-size:.9rem;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:7px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.scale button{font:inherit;padding:10px 0;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+.scale button small{font-size:.7rem;color:var(--muted)}
+.scale button[aria-pressed="true"]{border-color:var(--plum);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--plum)}
+.btn{font:inherit;font-weight:600;border:0;border-radius:12px;padding:12px 16px;background:var(--accent);color:var(--surface);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line);font-weight:500;padding:8px 12px}
+.toast{color:var(--good);font-weight:600;font-size:.9rem;min-height:1.2em}
+.toast.err{color:var(--bad)}
+.entry{border-top:1px solid var(--line);padding-top:12px;display:grid;grid-template-columns:auto 1fr;gap:4px 12px}
+.entry:first-child{border-top:0;padding-top:0}
+.dot{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:700;grid-row:span 3}
+.d-low{background:var(--good-bg);color:var(--good)}.d-mid{background:var(--mid-bg);color:var(--mid)}.d-high{background:var(--bad-bg);color:var(--bad)}
+.entry .when{font-size:.8rem;color:var(--muted)}
+.entry .what{min-width:0;overflow-wrap:anywhere}
+.tag{display:inline-block;font-size:.72rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--plum);border:1px solid var(--plum);border-radius:6px;padding:0 6px;margin-inline-start:6px}
+.insight{background:var(--accent-soft);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.lanes{display:grid;grid-template-columns:1fr;gap:8px}
+.lane{border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.lane.g{background:var(--good-bg)}.lane.a{background:var(--mid-bg)}.lane.r{background:var(--bad-bg)}
+.lane.g h3{color:var(--good)}.lane.a h3{color:var(--mid)}.lane.r h3{color:var(--bad)}
+.lane ul{margin:0;padding-inline-start:18px;columns:2;column-gap:20px}
+.lane li{break-inside:avoid;font-size:.95rem;margin-bottom:2px}
+@media (max-width:420px){.lane ul{columns:1}}
+.tips{display:flex;flex-direction:column;gap:14px}
+.tip{display:grid;grid-template-columns:28px 1fr;gap:2px 10px}
+.tip .n{font-family:var(--display);font-weight:700;color:var(--accent);font-size:1.1rem;grid-row:span 2}
+.tip p{color:var(--muted);font-size:.95rem}
+.dish .n{width:10px;height:10px;border-radius:50%;background:var(--plum);margin-top:.5em}
+.breath{display:flex;flex-direction:column;align-items:center;gap:14px;padding:22px 16px}
+.orb{width:150px;height:150px;border-radius:50%;background:radial-gradient(circle at 40% 35%,var(--accent-soft),var(--accent));transform:scale(.6);transition:transform 4s ease-in-out;display:grid;place-items:center;color:var(--surface);font-family:var(--display);font-weight:700;font-size:1.1rem}
+.redflags{border:2px solid var(--bad);background:var(--bad-bg);border-radius:14px;padding:16px}
+.redflags ul{margin:8px 0 0;padding-inline-start:20px}
+.redflags h2{color:var(--bad)}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px);z-index:5}
+nav button{font:inherit;font-size:.8rem;font-weight:600;background:none;border:0;color:var(--muted);padding:10px 4px 12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+nav button svg{width:22px;height:22px}
+nav button[aria-selected="true"]{color:var(--accent)}
+.foot{font-size:.8rem;color:var(--muted)}
+.quick{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--good-bg);border-radius:14px;padding:14px 16px}
+.quick p{font-weight:600;color:var(--good);min-width:0}
+.btn.good{background:var(--good);color:var(--surface)}
+.more summary{cursor:pointer;font-weight:600;color:var(--accent);padding-block:4px}
+.more-body{display:flex;flex-direction:column;gap:12px;margin-top:10px}
+.entry{position:relative;padding-inline-end:76px}
+.del{position:absolute;inset-inline-end:0;top:12px;font:inherit;font-size:.8rem;background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:4px 8px;cursor:pointer}
+.entry:first-child .del{top:0}
+.del.sure{color:var(--bad);border-color:var(--bad)}
+.checks{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.checks:empty{display:none}
+.chk{display:grid;grid-template-columns:10px auto 1fr;gap:2px 8px;align-items:baseline;font-size:.9rem}
+.cdot{width:10px;height:10px;border-radius:50%;background:var(--line);align-self:center}
+.chk.g .cdot{background:var(--good)}.chk.a .cdot{background:var(--mid)}.chk.r .cdot{background:var(--bad)}.chk.x .cdot,.chk.u .cdot{background:var(--muted)}
+.chk.p .cdot{animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.25}}
+.cname{font-weight:600;min-width:0;overflow-wrap:anywhere}
+.clvl{color:var(--muted)}.chk.g .clvl{color:var(--good)}.chk.a .clvl{color:var(--mid)}.chk.r .clvl{color:var(--bad)}
+.cnote{grid-column:2/-1;color:var(--muted);font-size:.85rem}
+@media (prefers-reduced-motion:reduce){.chk.p .cdot{animation:none}}
+.sync::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--mid);margin-inline-end:6px;vertical-align:middle}
+.sync[data-s="syncOn"]::before{background:var(--good)}
+.sync[data-s="syncRO"]::before,.sync[data-s="syncErr"]::before{background:var(--bad)}
+@media (prefers-reduced-motion:reduce){.orb{transition:none}}
+</style>
+</head>
+<body>
+
+<main>
+  <header class="top">
+    <div>
+      <p class="eyebrow" data-t="eyebrow"></p>
+      <h1>Zina's Days</h1>
+      <p class="lede" data-t="lede"></p>
+    </div>
+    <div class="langs" role="group" aria-label="Language">
+      <button data-l="en" lang="en">EN</button>
+      <button data-l="fr" lang="fr">FR</button>
+      <button data-l="ar" lang="ar">عربي</button>
+    </div>
+  </header>
+
+  <!-- LOG -->
+  <section id="v-log">
+    <div class="quick">
+      <p id="quickMsg" data-t="quickQ" aria-live="polite"></p>
+      <button class="btn good" id="goodDay" data-t="goodDay"></button>
+    </div>
+    <div class="panel">
+      <h2 data-t="howToday"></h2>
+      <div><span class="q" data-t="painQ"></span><div class="scale" id="pain" role="group"></div></div>
+      <div><span class="q" data-t="symQ"></span><div class="chips" id="sym"></div></div>
+      <div><span class="q" data-t="stoolQ"></span><div class="chips" id="stool"></div></div>
+      <div>
+        <label class="q" for="ate" data-t="ateQ"></label>
+        <div class="chips" id="foodChips" style="margin-bottom:10px"></div>
+        <input type="text" id="ate" autocomplete="off">
+        <ul class="checks" id="checks" aria-live="polite"></ul>
+        <p class="hint" data-t="ateHint" style="margin-top:6px"></p>
+      </div>
+      <details class="more">
+        <summary data-t="moreQ"></summary>
+        <div class="more-body">
+          <div><span class="q" data-t="stressQ"></span><div class="chips" id="stress"></div></div>
+          <div><label class="q" for="note" data-t="noteQ"></label><textarea id="note"></textarea></div>
+        </div>
+      </details>
+      <button class="btn" id="save" data-t="save"></button>
+      <p class="toast" id="toast" aria-live="polite"></p>
+    </div>
+    <div class="insight" id="insight"></div>
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <h2 data-t="recent"></h2>
+        <button class="btn ghost" id="clearEx" data-t="removeEx" hidden></button>
+      </div>
+      <div id="list" style="display:flex;flex-direction:column;gap:12px"></div>
+      <p class="foot sync" id="sync"></p>
+      <p class="foot" data-t="listFoot"></p>
+    </div>
+  </section>
+
+  <!-- FOODS -->
+  <section id="v-food" hidden>
+    <div><h2 data-t="foodH"></h2><p class="lede" data-t="foodLede"></p></div>
+    <input type="text" id="q" aria-label="Search">
+    <div class="lanes" id="lanes"></div>
+    <div class="panel"><h3 data-t="dishH"></h3><div class="tips" id="dishes"></div></div>
+    <p class="foot" data-t="foodFoot"></p>
+  </section>
+
+  <!-- RELIEF -->
+  <section id="v-relief" hidden>
+    <div><h2 data-t="reliefH"></h2><p class="lede" data-t="reliefLede"></p></div>
+    <div class="panel"><h3 data-t="mixH"></h3><div class="tips" id="mixed"></div></div>
+    <div class="panel breath">
+      <h3 data-t="breathH"></h3>
+      <div class="orb" id="orb"></div>
+      <p class="hint" data-t="breathP" style="text-align:center"></p>
+      <button class="btn" id="bbtn"></button>
+    </div>
+    <div class="panel"><div class="tips" id="relief"></div></div>
+    <div class="panel"><h3 data-t="familyH"></h3><div class="tips" id="family"></div></div>
+  </section>
+
+</main>
+
+<nav role="tablist">
+  <button role="tab" data-v="log" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 9h6M9 13h6M9 17h3"/></svg><span data-t="navLog"></span></button>
+  <button role="tab" data-v="food" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12h16a8 8 0 0 1-16 0z"/><path d="M8 8c0-2 2-2 2-4M13 8c0-2 2-2 2-4"/></svg><span data-t="navFood"></span></button>
+  <button role="tab" data-v="relief" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span data-t="navRelief"></span></button>
+</nav>
+
+<script>
+/* ---------- Text in three languages ---------- */
+const T={
+en:{eyebrow:"Your IBS companion",lede:"Track how you feel, find your trigger foods, and calm a flare.",
+howToday:"How's your tummy today?",painQ:"Pain or discomfort",pain:["None","Mild","Some","Bad","Severe"],symQ:"Symptoms",
+syms:{bloat:"Bloating",cramps:"Cramps",gas:"Gas",diar:"Diarrhoea",const:"Constipation",urg:"Urgency",naus:"Nausea",tired:"Tired",pelvic:"Pelvic pain"},
+ateQ:"What did you eat?",ateHint:"Tap foods above or type your own, separated by commas. Each food gets checked.",noNet:"Couldn't check. Check your internet.",contains:"Contains:",lvlX:"Depends on the type",lvlU:"Not sure",checking:"Checking…",checkBtn:"Check this food",
+quickQ:"Feeling fine today?",goodDay:"Log a good day",goodSaved:"Good day saved.",mealQ:"Which meal?",meals:{bf:"Breakfast",lunch:"Lunch",snack:"Snack",dinner:"Dinner",day:"Whole day"},
+moreQ:"Stress and notes",del:"Delete",delSure:"Tap again to delete",
+defFoods:["rice","kesra","bread","chorba","couscous","chicken","eggs","potatoes","vegetables","mint tea","coffee","lben","dates","fruit"],
+syncOn:"Saved online. Shows on any phone where this page is open.",syncOff:"Saved on this phone only.",syncWait:"Connecting…",syncErr:"Couldn't reach the server. Entries are kept on this phone and will sync next time.",syncRO:"This page is view-only for you, so entries stay on this phone. Ask for Contributor access to sync.",
+stoolQ:"Stool today",stool:{hard:"Hard",normal:"Normal",loose:"Loose",none:"None"},mixH:"Your type: mixed IBS",stressQ:"Stress today",stress:{low:"Low",med:"Medium",high:"High"},
+noteQ:"Notes",notePh:"Sleep, medication, surgery recovery, anything else",save:"Save today's entry",saved:"Saved. Feel better soon.",pickPain:"Pick a pain level first.",
+recent:"Recent days",removeEx:"Remove examples",example:"Example",stressWord:"stress",noSym:"No symptoms",ateLbl:"Ate",empty:"No entries yet. Save the first one above.",
+listFoot:"Show this log to your doctor or dietitian.",
+patterns:"Patterns",patternsEmpty:"Log a few days and possible trigger foods will show up here.",badFoods:"Foods that show up on bad days",nothing:"Nothing stands out yet.",clue:"A clue, not proof. A pattern over 2–3 weeks is more reliable.",
+foodH:"Food guide for Algerian cooking",foodLede:"Based on the low-FODMAP diet. FODMAPs are sugars that ferment in the gut and cause gas, bloating and pain in many people with IBS. Portion size matters.",
+searchPh:"Search a food, e.g. dates, kesra",notFound:"Not in the list.",
+lanes:{g:["Usually fine","Low-FODMAP in normal portions"],a:["Small portions only","Fine in a small amount, triggers in a large one"],r:["Common triggers","High-FODMAP. Reintroduce one at a time later"]},
+dishH:"Adapting Algerian dishes",foodFoot:"Strict low-FODMAP is for 2–6 weeks only. Then add foods back one at a time to find your personal triggers. A dietitian makes this much easier.",
+reliefH:"During a flare",reliefLede:"Things that help many people right now.",breathH:"Slow belly breathing",breathP:"Breathe in for 4, out for 6. It calms the gut within a few minutes.",
+start:"Start",stop:"Stop",inn:"In",out:"Out",familyH:"How family can help",
+redH:"See a doctor soon if you have",redP:"These are not typical of IBS. If one appears, see the doctor even though IBS is already diagnosed.",apptH:"Get the most from an appointment",
+docFoot:"This page gives general information, not a diagnosis. Your doctor knows your situation best.",
+navLog:"Log",navFood:"Foods",navRelief:"Relief",navDoc:"Doctor",postopH:"Get urgent medical help if you have",surgH:"After your hysterectomy",locale:"en-GB"},
+
+fr:{eyebrow:"Votre compagnon côlon irritable",lede:"Suivez vos symptômes, repérez les aliments déclencheurs et calmez les crises.",
+howToday:"Comment va votre ventre aujourd'hui ?",painQ:"Douleur ou gêne",pain:["Aucune","Légère","Moyenne","Forte","Sévère"],symQ:"Symptômes",
+syms:{bloat:"Ballonnements",cramps:"Crampes",gas:"Gaz",diar:"Diarrhée",const:"Constipation",urg:"Urgence",naus:"Nausée",tired:"Fatigue",pelvic:"Douleur pelvienne"},
+ateQ:"Qu'avez-vous mangé ?",ateHint:"Touchez les aliments ci-dessus ou écrivez les vôtres, séparés par des virgules. Chaque aliment est vérifié.",noNet:"Vérification impossible. Vérifiez internet.",contains:"Contient :",lvlX:"Dépend du type",lvlU:"Incertain",checking:"Vérification…",checkBtn:"Vérifier cet aliment",
+quickQ:"Ça va bien aujourd'hui ?",goodDay:"Noter une bonne journée",goodSaved:"Bonne journée enregistrée.",mealQ:"Quel repas ?",meals:{bf:"Petit-déjeuner",lunch:"Déjeuner",snack:"Goûter",dinner:"Dîner",day:"Toute la journée"},
+moreQ:"Stress et notes",del:"Supprimer",delSure:"Touchez encore pour supprimer",
+defFoods:["riz","kesra","pain","chorba","couscous","poulet","œufs","pommes de terre","légumes","thé à la menthe","café","lben","dattes","fruits"],
+syncOn:"Enregistré en ligne. Visible sur tout téléphone où cette page est ouverte.",syncOff:"Enregistré sur ce téléphone uniquement.",syncWait:"Connexion…",syncErr:"Serveur injoignable. Les entrées restent sur ce téléphone et seront synchronisées plus tard.",syncRO:"Cette page est en lecture seule pour vous, les entrées restent donc sur ce téléphone. Demandez l'accès Contributeur pour synchroniser.",
+stoolQ:"Selles aujourd'hui",stool:{hard:"Dures",normal:"Normales",loose:"Molles",none:"Aucune"},mixH:"Votre type : côlon irritable mixte",stressQ:"Stress aujourd'hui",stress:{low:"Faible",med:"Moyen",high:"Élevé"},
+noteQ:"Notes",notePh:"Sommeil, médicaments, récupération après l'opération, autre",save:"Enregistrer la journée",saved:"Enregistré. Prenez soin de vous.",pickPain:"Choisissez d'abord le niveau de douleur.",
+recent:"Derniers jours",removeEx:"Supprimer les exemples",example:"Exemple",stressWord:"stress",noSym:"Aucun symptôme",ateLbl:"Mangé",empty:"Aucune entrée. Enregistrez la première ci-dessus.",
+listFoot:"Montrez ce journal à votre médecin ou diététicien(ne).",
+patterns:"Tendances",patternsEmpty:"Après quelques jours, les aliments suspects apparaîtront ici.",badFoods:"Aliments présents les mauvais jours",nothing:"Rien de net pour l'instant.",clue:"Un indice, pas une preuve. Une tendance sur 2–3 semaines est plus fiable.",
+foodH:"Guide alimentaire : cuisine algérienne",foodLede:"Basé sur le régime pauvre en FODMAP. Les FODMAP sont des sucres qui fermentent dans l'intestin et provoquent gaz, ballonnements et douleurs chez beaucoup de personnes atteintes du côlon irritable. La quantité compte.",
+searchPh:"Chercher un aliment, ex. dattes, kesra",notFound:"Pas dans la liste.",
+lanes:{g:["Généralement bien toléré","Pauvre en FODMAP en portion normale"],a:["En petite quantité","Toléré en petite quantité, déclenche en grande"],r:["Déclencheurs fréquents","Riche en FODMAP. À réintroduire un par un plus tard"]},
+dishH:"Adapter les plats algériens",foodFoot:"Le régime strict ne dure que 2 à 6 semaines. Ensuite, réintroduisez les aliments un par un pour trouver vos propres déclencheurs. Un(e) diététicien(ne) facilite beaucoup cette étape.",
+reliefH:"Pendant une crise",reliefLede:"Ce qui aide beaucoup de personnes sur le moment.",breathH:"Respiration abdominale lente",breathP:"Inspirez sur 4 temps, expirez sur 6. Cela calme l'intestin en quelques minutes.",
+start:"Démarrer",stop:"Arrêter",inn:"Inspirez",out:"Expirez",familyH:"Comment la famille peut aider",
+redH:"Consultez rapidement un médecin en cas de",redP:"Ces signes ne sont pas typiques du côlon irritable. Si l'un d'eux apparaît, consultez même si le diagnostic est déjà posé.",apptH:"Bien préparer le rendez-vous",
+docFoot:"Cette page donne des informations générales, pas un diagnostic. Votre médecin connaît le mieux votre situation.",
+navLog:"Journal",navFood:"Aliments",navRelief:"Soulagement",navDoc:"Médecin",postopH:"Consultez en urgence en cas de",surgH:"Après votre hystérectomie",locale:"fr-FR"},
+
+ar:{eyebrow:"رفيقتك مع القولون العصبي",lede:"تابعي حالتك، اعرفي الأطعمة التي تسبب لك الأعراض، وهدّئي النوبات.",
+howToday:"كيف حال بطنك اليوم؟",painQ:"الألم أو الانزعاج",pain:["لا شيء","خفيف","متوسط","قوي","شديد"],symQ:"الأعراض",
+syms:{bloat:"انتفاخ",cramps:"تقلصات",gas:"غازات",diar:"إسهال",const:"إمساك",urg:"حاجة ملحّة للحمام",naus:"غثيان",tired:"تعب",pelvic:"ألم في الحوض"},
+ateQ:"ماذا أكلتِ؟",ateHint:"اضغطي على الأطعمة في الأعلى أو اكتبي غيرها مع الفصل بفاصلة. يتم التحقق من كل طعام.",noNet:"تعذّر التحقق. تحقّقي من الإنترنت.",contains:"يحتوي على:",lvlX:"حسب النوع",lvlU:"غير مؤكد",checking:"جارٍ التحقق…",checkBtn:"تحقّقي من هذا الطعام",
+quickQ:"هل أنتِ بخير اليوم؟",goodDay:"سجّلي يوماً جيداً",goodSaved:"تم حفظ يوم جيد.",mealQ:"أي وجبة؟",meals:{bf:"الفطور",lunch:"الغداء",snack:"قهوة العصر",dinner:"العشاء",day:"اليوم كله"},
+moreQ:"التوتر والملاحظات",del:"حذف",delSure:"اضغطي مرة أخرى للحذف",
+defFoods:["أرز","كسرة","خبز","شوربة","كسكسي","دجاج","بيض","بطاطا","خضر","شاي بالنعناع","قهوة","لبن","تمر","فواكه"],
+syncOn:"محفوظ على الإنترنت. يظهر على أي هاتف تُفتح فيه هذه الصفحة.",syncOff:"محفوظ على هذا الهاتف فقط.",syncWait:"جارٍ الاتصال…",syncErr:"تعذّر الوصول إلى الخادم. التسجيلات محفوظة على الهاتف وستُزامَن لاحقاً.",syncRO:"هذه الصفحة للعرض فقط بالنسبة لك، لذلك تبقى التسجيلات على هذا الهاتف. اطلبي صلاحية المساهمة للمزامنة.",
+stoolQ:"البراز اليوم",stool:{hard:"صلب",normal:"طبيعي",loose:"ليّن أو سائل",none:"لا يوجد"},mixH:"نوعك: قولون عصبي مختلط",stressQ:"التوتر اليوم",stress:{low:"منخفض",med:"متوسط",high:"مرتفع"},
+noteQ:"ملاحظات",notePh:"النوم، الأدوية، التعافي بعد العملية، أي شيء آخر",save:"حفظ تسجيل اليوم",saved:"تم الحفظ. شفاكِ الله.",pickPain:"اختاري مستوى الألم أولاً.",
+recent:"الأيام الأخيرة",removeEx:"حذف الأمثلة",example:"مثال",stressWord:"التوتر",noSym:"بدون أعراض",ateLbl:"الأكل",empty:"لا توجد تسجيلات بعد. احفظي أول تسجيل في الأعلى.",
+listFoot:"اعرضي هذا السجل على طبيبك أو أخصائي التغذية.",
+patterns:"ملاحظات",patternsEmpty:"سجّلي بضعة أيام وستظهر هنا الأطعمة المشتبه بها.",badFoods:"أطعمة تتكرر في الأيام السيئة",nothing:"لا شيء واضح حتى الآن.",clue:"هذا مؤشر وليس دليلاً. النمط على مدى 2–3 أسابيع أدق.",
+foodH:"دليل الأطعمة: المطبخ الجزائري",foodLede:"مبني على حمية قليلة الفودماب (FODMAP). الفودماب سكريات تتخمّر في الأمعاء وتسبب الغازات والانتفاخ والألم لدى كثير من مرضى القولون العصبي. الكمية مهمة.",
+searchPh:"ابحثي عن طعام، مثلاً: تمر، كسرة",notFound:"غير موجود في القائمة.",
+lanes:{g:["غالباً لا مشكلة","قليل الفودماب بالكمية العادية"],a:["بكميات صغيرة فقط","مقبول بكمية صغيرة، ويسبب الأعراض بكمية كبيرة"],r:["مسببات شائعة","غني بالفودماب. يُعاد إدخاله واحداً تلو الآخر لاحقاً"]},
+dishH:"تكييف الأطباق الجزائرية",foodFoot:"الحمية الصارمة لمدة 2 إلى 6 أسابيع فقط. بعدها أعيدي الأطعمة واحداً تلو الآخر لتعرفي ما يضرك أنتِ بالذات. أخصائي التغذية يسهّل هذه المرحلة كثيراً.",
+reliefH:"أثناء النوبة",reliefLede:"أشياء تساعد كثيرين في الحال.",breathH:"التنفس البطني البطيء",breathP:"شهيق لمدة 4 ثوانٍ، وزفير لمدة 6. يهدّئ الأمعاء خلال دقائق.",
+start:"ابدئي",stop:"توقفي",inn:"شهيق",out:"زفير",familyH:"كيف تساعد العائلة",
+redH:"راجعي الطبيب قريباً إذا ظهر لديك",redP:"هذه العلامات ليست معتادة في القولون العصبي. إذا ظهرت إحداها، راجعي الطبيب حتى مع وجود التشخيص.",apptH:"للاستفادة من الموعد الطبي",
+docFoot:"هذه الصفحة تقدّم معلومات عامة وليست تشخيصاً. طبيبك أعرف بحالتك.",
+navLog:"السجل",navFood:"الأطعمة",navRelief:"الراحة",navDoc:"الطبيب",postopH:"اطلبي المساعدة الطبية بسرعة إذا ظهر لديك",surgH:"بعد استئصال الرحم",locale:"ar-DZ"}
+};
+
+/* Food lists: [English, French, Arabic] */
+const FOODS={
+g:[["Rice","Riz","الأرز"],["Potatoes","Pommes de terre","البطاطا"],["Carrots","Carottes","الجزر"],["Courgette","Courgette","القرعة"],["Tomatoes","Tomates","الطماطم"],["Cucumber","Concombre","الخيار"],["Lettuce, spinach","Laitue, épinards","الخس، السبانخ"],["Green beans","Haricots verts","اللوبيا الخضراء"],["Peppers (felfel)","Poivrons (felfel)","الفلفل الحلو"],["Aubergine (1 cup)","Aubergine (1 tasse)","الباذنجان (كوب)"],["Eggs","Œufs","البيض"],["Chicken, lamb, beef (plain)","Poulet, agneau, bœuf (nature)","الدجاج، لحم الغنم، البقر"],["Sardines and fish","Sardines et poisson","السردين والسمك"],["Olives and olive oil","Olives et huile d'olive","الزيتون وزيت الزيتون"],["Mint tea, lightly sweet","Thé à la menthe peu sucré","الشاي بالنعناع قليل السكر"],["Lactose-free milk","Lait sans lactose","حليب خالٍ من اللاكتوز"],["Hard cheese (gouda, edam)","Fromage à pâte dure (gouda, edam)","الجبن الصلب (قودا، إيدام)"],["Oranges, clementines","Oranges, clémentines","البرتقال والمندرين"],["Grapes","Raisin","العنب"],["Strawberries","Fraises","الفراولة"],["Kiwi","Kiwi","الكيوي"],["Firm banana","Banane peu mûre","موز غير ناضج كثيراً"],["Oats","Flocons d'avoine","الشوفان"],["Peanuts (kawkaw)","Cacahuètes (kawkaw)","الكاوكاو"],["Coriander, parsley, cumin, paprika, ginger","Coriandre, persil, cumin, paprika, gingembre","الكسبر، المعدنوس، الكمون، الفلفل الأحمر، الزنجبيل"]],
+a:[["Couscous (small plate)","Couscous (petite assiette)","الكسكسي (صحن صغير)"],["Kesra (1 small piece)","Kesra (un petit morceau)","الكسرة (قطعة صغيرة)"],["Baguette (1 slice)","Baguette (1 tranche)","الخبز (قطعة واحدة)"],["Chorba frik (1 small bowl)","Chorba frik (1 petit bol)","شوربة الفريك (صحن صغير)"],["Canned chickpeas, rinsed (¼ cup)","Pois chiches en boîte, rincés (¼ tasse)","الحمص المعلّب المغسول (ربع كوب)"],["Canned lentils, rinsed (½ cup)","Lentilles en boîte, rincées (½ tasse)","العدس المعلّب المغسول (نصف كوب)"],["Coffee (1 cup)","Café (1 tasse)","القهوة (فنجان واحد)"],["Almonds (10)","Amandes (10)","اللوز (10 حبات)"],["Pomegranate (¼ cup seeds)","Grenade (¼ tasse de grains)","الرمان (ربع كوب حبوب)"],["Sweet potato (½ cup)","Patate douce (½ tasse)","البطاطا الحلوة (نصف كوب)"],["Avocado (⅛)","Avocat (⅛)","الأفوكادو (ثُمن حبة)"],["Broccoli heads (¾ cup)","Têtes de brocoli (¾ tasse)","رؤوس البروكلي (¾ كوب)"],["Dark chocolate (a few squares)","Chocolat noir (quelques carrés)","الشوكولاتة السوداء (قطع قليلة)"]],
+r:[["Garlic","Ail","الثوم"],["Onion","Oignon","البصل"],["Dates","Dattes","التمر"],["Fresh and dried figs","Figues fraîches et sèches","الكرموس الطري واليابس"],["Raisins, prunes (tajine lahlou)","Raisins secs, pruneaux (tajine lahlou)","الزبيب والبرقوق المجفف (طاجين الحلو)"],["Apples, pears","Pommes, poires","التفاح والإجاص"],["Watermelon, apricots, peaches","Pastèque, abricots, pêches","الدلاع، المشمش، الخوخ"],["Milk, lben, raib","Lait, lben, raïb","الحليب، اللبن، الرايب"],["Fresh cheese (jben), yogurt","Fromage frais (jben), yaourt","الجبن الطري، الياغورت"],["Honey, makroud","Miel, makroud","العسل، المقروط"],["Loubia, dried chickpeas, adess (lentil stew)","Loubia, pois chiches secs, adès","اللوبيا، الحمص اليابس، العدس"],["Cauliflower, mushrooms, artichoke","Chou-fleur, champignons, artichaut","القرنبيط، الفطر، الخرشف"],["Cashews, pistachios","Noix de cajou, pistaches","الكاجو والفستق"],["Big plates of couscous, kesra, mhadjeb, rechta, trida","Grandes assiettes de couscous, kesra, mhadjeb, rechta, trida","صحون كبيرة من الكسكسي، الكسرة، المحاجب، الرشتة، التريدة"],["Hmiss and garlic sauces","Hmiss et sauces à l'ail","الحميس والصلصات بالثوم"],["Fizzy drinks, juice, sugar-free gum","Sodas, jus, chewing-gum sans sucre","المشروبات الغازية، العصير، العلكة بدون سكر"]]
+};
+
+/* Tips: [title, text] per language */
+const TIPS={
+dishes:{
+en:[["Chorba frik","Fry garlic in the oil, take it out, and cook with that oil. Use the green tops of spring onion instead of onion. A few rinsed canned chickpeas. One bowl, not three."],["Couscous","A small plate with plenty of carrot, courgette and potato, with chicken or lamb. Leave onion out of the sauce and keep the chickpeas few."],["Chakchouka","Tomatoes, peppers and eggs are all fine. Just use garlic oil instead of garlic and onion."],["Tajine zitoune","Chicken, olives and carrots are good. Leave out onion and mushrooms."],["Loubia and adess","Bean and lentil stews are strong triggers. Try a small portion of rinsed canned lentils, or have a meat and potato stew instead."],["Ramadan","Break the fast with one date and water, then a light chorba. Go easy on zlabia and fried bourek."],["Spices","Cumin, coriander, paprika, ginger, turmeric and cinnamon are fine. Check that ras el hanout has no garlic or onion powder."]],
+fr:[["Chorba frik","Faites revenir l'ail dans l'huile, retirez-le, et cuisinez avec cette huile. Utilisez le vert de l'oignon nouveau à la place de l'oignon. Quelques pois chiches en boîte rincés. Un bol, pas trois."],["Couscous","Une petite assiette avec beaucoup de carottes, courgettes et pommes de terre, avec poulet ou agneau. Pas d'oignon dans la sauce et peu de pois chiches."],["Chakchouka","Tomates, poivrons et œufs sont bien tolérés. Remplacez simplement l'ail et l'oignon par l'huile à l'ail."],["Tajine zitoune","Poulet, olives et carottes conviennent. Retirez l'oignon et les champignons."],["Loubia et adès","Les plats de haricots et de lentilles déclenchent souvent. Essayez une petite portion de lentilles en boîte rincées, ou préférez un ragoût de viande et pommes de terre."],["Ramadan","Rompez le jeûne avec une datte et de l'eau, puis une chorba légère. Modérez la zlabia et le bourek frit."],["Épices","Cumin, coriandre, paprika, gingembre, curcuma et cannelle conviennent. Vérifiez que le ras el hanout ne contient pas d'ail ni d'oignon en poudre."]],
+ar:[["شوربة الفريك","اقلي الثوم في الزيت ثم أخرجيه واطبخي بذلك الزيت. استعملي الجزء الأخضر من البصل الأخضر بدل البصل. قليل من الحمص المعلّب المغسول. صحن واحد فقط."],["الكسكسي","صحن صغير مع كثير من الجزر والقرعة والبطاطا، ودجاج أو لحم غنم. بدون بصل في المرق، وقلّلي الحمص."],["الشكشوكة","الطماطم والفلفل والبيض كلها مناسبة. فقط استعملي زيت الثوم بدل الثوم والبصل."],["طاجين الزيتون","الدجاج والزيتون والجزر مناسبة. اتركي البصل والفطر."],["اللوبيا والعدس","من أقوى المسببات. جربي كمية صغيرة من العدس المعلّب المغسول، أو مرق اللحم بالبطاطا بدلاً منها."],["رمضان","افطري بتمرة واحدة وماء، ثم شوربة خفيفة. قلّلي من الزلابية والبوراك المقلي."],["التوابل","الكمون والكسبر والفلفل الأحمر والزنجبيل والكركم والقرفة مناسبة. تأكدي أن رأس الحانوت لا يحتوي على مسحوق الثوم أو البصل."]]},
+relief:{
+en:[["Warmth on the belly","A hot water bottle relaxes cramping muscles. Wrap it in a towel so it doesn't touch the skin directly."],["Peppermint","Mint tea without much sugar, or enteric-coated peppermint oil capsules (ask the pharmacist). Skip it if it gives you heartburn."],["A gentle 10–15 minute walk","Helps trapped gas move. Lying on your left side can help too."],["Small, plain meals","Rice, eggs, potatoes, plain chicken or fish. Eat slowly. Avoid fried, fatty and very spicy food (harissa) until it settles."],["Sip water","Especially with diarrhoea. Avoid fizzy drinks and lots of coffee."]],
+fr:[["Chaleur sur le ventre","Une bouillotte détend les muscles crispés. Enveloppez-la dans une serviette pour ne pas brûler la peau."],["Menthe","Thé à la menthe peu sucré, ou capsules d'huile de menthe poivrée gastro-résistantes (demandez au pharmacien). À éviter en cas de brûlures d'estomac."],["Marche douce 10 à 15 minutes","Aide les gaz à circuler. S'allonger sur le côté gauche aide aussi."],["Repas petits et simples","Riz, œufs, pommes de terre, poulet ou poisson nature. Mangez lentement. Évitez le frit, le gras et le très piquant (harissa) jusqu'à ce que ça se calme."],["Boire de l'eau par petites gorgées","Surtout en cas de diarrhée. Évitez les sodas et trop de café."]],
+ar:[["دفء على البطن","قربة ماء ساخن ترخي عضلات البطن المتقلصة. لفّيها بمنشفة حتى لا تلمس الجلد مباشرة."],["النعناع","شاي بالنعناع قليل السكر، أو كبسولات زيت النعناع المغلّفة (اسألي الصيدلي). تجنّبيه إذا سبّب لك حرقة المعدة."],["مشي خفيف 10 إلى 15 دقيقة","يساعد على خروج الغازات. الاستلقاء على الجانب الأيسر يساعد أيضاً."],["وجبات صغيرة وبسيطة","أرز، بيض، بطاطا، دجاج أو سمك بدون دسم. كلي ببطء. تجنّبي المقلي والدسم والحار جداً (الهريسة) حتى تهدأ النوبة."],["اشربي الماء ببطء","خاصة مع الإسهال. تجنّبي المشروبات الغازية والإكثار من القهوة."]]},
+family:{
+en:[["Believe the pain is real","IBS pain is physical even when tests are normal. Stress makes it worse, and feeling understood helps."],["Cook the swaps together","Use the food guide for family meals so she doesn't have to eat something separate."]],
+fr:[["Croire que la douleur est réelle","La douleur du côlon irritable est physique même quand les examens sont normaux. Le stress l'aggrave, se sentir compris(e) aide."],["Cuisiner les alternatives ensemble","Utilisez le guide pour les repas de famille, pour qu'elle n'ait pas à manger à part."]],
+ar:[["صدّقوا أن الألم حقيقي","ألم القولون العصبي جسدي حتى لو كانت التحاليل سليمة. التوتر يزيده، والشعور بالتفهّم يساعد."],["اطبخوا البدائل معاً","استعملوا دليل الأطعمة لوجبات العائلة حتى لا تأكل وحدها طعاماً مختلفاً."]]},
+appt:{
+en:[["Bring 2 weeks of the log","Pain scores, foods and symptoms show the doctor the pattern."],["If it hasn't been done, ask about coeliac testing","A blood test, done while you still eat wheat. Coeliac disease is not rare in Algeria and can look like IBS."],["Ask which IBS type you have","With constipation, with diarrhoea, or mixed. Treatment differs for each."],["Ask about a dietitian","Guided low-FODMAP is the best-studied diet for IBS."]],
+fr:[["Apportez 2 semaines du journal","Douleur, aliments et symptômes montrent la tendance au médecin."],["Si ce n'est pas fait, demandez un test de maladie cœliaque","Une prise de sang, à faire en mangeant encore du blé. La maladie cœliaque n'est pas rare en Algérie et peut ressembler au côlon irritable."],["Demandez quel type vous avez","Avec constipation, avec diarrhée, ou mixte. Le traitement diffère."],["Demandez un(e) diététicien(ne)","Le régime pauvre en FODMAP encadré est le mieux étudié pour le côlon irritable."]],
+ar:[["أحضري سجل أسبوعين","درجات الألم والأطعمة والأعراض توضّح النمط للطبيب."],["إذا لم يُجرَ بعد، اسألي عن تحليل الداء البطني (حساسية القمح)","تحليل دم يُجرى وأنتِ ما زلتِ تأكلين القمح. هذا المرض ليس نادراً في الجزائر وقد يشبه القولون العصبي."],["اسألي عن نوع القولون العصبي","مع الإمساك، مع الإسهال، أو مختلط. العلاج يختلف لكل نوع."],["اسألي عن أخصائي تغذية","حمية قليلة الفودماب بإشراف مختص هي الأكثر دراسة للقولون العصبي."]]}
+};
+const RED={
+en:["Blood in the stool or black stools","Weight loss without trying","Fever, or vomiting that won't stop","Symptoms that wake you at night","Signs of anaemia (very tired, pale, short of breath)","Symptoms that started after age 50, or suddenly changed","Family history of bowel cancer, coeliac disease, or Crohn's/colitis"],
+fr:["Sang dans les selles ou selles noires","Perte de poids involontaire","Fièvre, ou vomissements qui ne s'arrêtent pas","Symptômes qui réveillent la nuit","Signes d'anémie (grande fatigue, pâleur, essoufflement)","Symptômes apparus après 50 ans, ou qui changent brusquement","Antécédents familiaux de cancer du côlon, maladie cœliaque, Crohn ou rectocolite"],
+ar:["دم في البراز أو براز أسود","نقص في الوزن دون سبب","حمّى أو تقيّؤ لا يتوقف","أعراض توقظك من النوم ليلاً","علامات فقر الدم (تعب شديد، شحوب، ضيق تنفس)","أعراض بدأت بعد سن الخمسين أو تغيّرت فجأة","تاريخ عائلي لسرطان القولون، أو الداء البطني، أو داء كرون/التهاب القولون"]
+};
+const POSTOP={
+en:["Severe belly pain with vomiting and a swollen belly","No stool and no wind at all for a day or more, with pain","Fever with belly or pelvic pain","Any vaginal bleeding","Pain or burning when passing urine, with fever"],
+fr:["Forte douleur au ventre avec vomissements et ventre gonflé","Ni selles ni gaz depuis un jour ou plus, avec douleur","Fièvre avec douleur au ventre ou au bassin","Tout saignement vaginal","Douleur ou brûlure en urinant, avec fièvre"],
+ar:["ألم شديد في البطن مع تقيّؤ وانتفاخ البطن","عدم خروج البراز ولا الغازات ليوم أو أكثر، مع ألم","حمّى مع ألم في البطن أو الحوض","أي نزيف مهبلي","ألم أو حرقة عند التبول مع حمّى"]};
+TIPS.surg={
+en:[["IBS and endometriosis often go together","Many women with endometriosis also have IBS, and gut symptoms can continue after surgery. The food guide and relief tips are the right place to start. If your symptoms change, mention it at your next visit."],["Endometriosis can feel like IBS","Endometriosis near the bowel also causes bloating, cramps and bowel changes, and many women have both. Tell the gynaecologist about the gut symptoms."],["Watch for a monthly pattern","If the ovaries were kept, hormones still follow a monthly cycle even without periods. If symptoms come back at the same time each month, show the log to the gynaecologist."],["If the ovaries were removed","Hot flushes, poor sleep and mood changes can start. Ask the gynaecologist which hormone treatment is safe after endometriosis."]],
+fr:[["Côlon irritable et endométriose vont souvent ensemble","Beaucoup de femmes atteintes d'endométriose ont aussi un côlon irritable, et les symptômes digestifs peuvent continuer après l'opération. Le guide alimentaire et les conseils de soulagement sont le bon point de départ. Si vos symptômes changent, signalez-le à la prochaine consultation."],["L'endométriose peut ressembler au côlon irritable","L'endométriose près de l'intestin provoque aussi ballonnements, crampes et troubles du transit, et beaucoup de femmes ont les deux. Parlez des symptômes digestifs au gynécologue."],["Repérez un rythme mensuel","Si les ovaires ont été gardés, les hormones suivent encore un cycle mensuel, même sans règles. Si les symptômes reviennent à la même période chaque mois, montrez le journal au gynécologue."],["Si les ovaires ont été retirés","Bouffées de chaleur, mauvais sommeil et sautes d'humeur peuvent apparaître. Demandez au gynécologue quel traitement hormonal convient après une endométriose."]],
+ar:[["القولون العصبي وبطانة الرحم المهاجرة يأتيان معاً كثيراً","كثير من النساء المصابات ببطانة الرحم المهاجرة لديهن أيضاً قولون عصبي، وأعراض البطن قد تستمر بعد العملية. دليل الأطعمة ونصائح الراحة هي نقطة البداية المناسبة. إذا تغيّرت الأعراض، أخبري الطبيب في الزيارة القادمة."],["بطانة الرحم المهاجرة قد تشبه القولون العصبي","عندما تكون قرب الأمعاء تسبب أيضاً انتفاخاً وتقلصات وتغيّراً في الإخراج، وكثير من النساء لديهن الاثنان معاً. أخبري طبيب النساء بأعراض البطن."],["لاحظي إن كان هناك نمط شهري","إذا بقي المبيضان، تستمر الهرمونات في دورة شهرية حتى بدون حيض. إذا عادت الأعراض في نفس الوقت كل شهر، اعرضي السجل على طبيب النساء."],["إذا تمت إزالة المبيضين","قد تبدأ الهبات الساخنة وقلة النوم وتقلّب المزاج. اسألي طبيب النساء عن العلاج الهرموني المناسب بعد بطانة الرحم المهاجرة."]]};
+TIPS.mixed={
+en:[["Psyllium helps both sides","Soluble fibre (psyllium) firms loose stool and softens hard stool. Start with 1 teaspoon a day in a big glass of water and increase slowly over 2–3 weeks. Avoid wheat bran."],["On loose days","Small plain meals: rice, potatoes, eggs, firm banana. Cut down on coffee and fried or fatty food, and drink water. Ask the doctor before taking anti-diarrhoea medicine, because with mixed IBS it can swing you into constipation."],["On hard days","Drink more water, take a walk, and try 2 kiwis a day. Don't strain; raising your feet on a small stool helps. Ask the doctor before taking laxatives, because they can swing you into diarrhoea."],["Keep a steady rhythm","Eat at regular times and don't skip meals. Give yourself unhurried time in the toilet after breakfast."]],
+fr:[["Le psyllium aide dans les deux cas","Les fibres solubles (psyllium) raffermissent les selles molles et ramollissent les selles dures. Commencez par 1 cuillère à café par jour dans un grand verre d'eau, et augmentez doucement sur 2 à 3 semaines. Évitez le son de blé."],["Les jours de selles molles","Petits repas simples : riz, pommes de terre, œufs, banane peu mûre. Réduisez le café et les aliments frits ou gras, et buvez de l'eau. Demandez au médecin avant de prendre un anti-diarrhéique, car avec un côlon irritable mixte il peut provoquer une constipation."],["Les jours de selles dures","Buvez plus d'eau, marchez, et essayez 2 kiwis par jour. Ne poussez pas ; surélever les pieds sur un petit tabouret aide. Demandez au médecin avant de prendre un laxatif, car il peut provoquer une diarrhée."],["Gardez un rythme régulier","Mangez à heures fixes et ne sautez pas de repas. Prenez le temps d'aller aux toilettes sans vous presser après le petit-déjeuner."]],
+ar:[["بزر القطونة يساعد في الحالتين","الألياف الذائبة (بزر القطونة أو السيليوم) تجعل البراز الليّن أكثر تماسكاً والبراز الصلب أكثر ليونة. ابدئي بملعقة صغيرة يومياً في كأس ماء كبير، وزيدي ببطء خلال 2–3 أسابيع. تجنّبي نخالة القمح."],["في أيام الإسهال","وجبات صغيرة وبسيطة: أرز، بطاطا، بيض، موز غير ناضج كثيراً. قلّلي القهوة والمقلي والدسم، واشربي الماء. اسألي الطبيب قبل أخذ دواء ضد الإسهال، لأنه مع القولون المختلط قد يسبب الإمساك."],["في أيام الإمساك","اشربي ماء أكثر، امشي قليلاً، وجربي حبتي كيوي يومياً. لا تضغطي؛ رفع القدمين على كرسي صغير يساعد. اسألي الطبيب قبل أخذ مليّن، لأنه قد يسبب الإسهال."],["حافظي على إيقاع منتظم","كلي في أوقات ثابتة ولا تتركي الوجبات. خذي وقتك في الحمام بدون استعجال بعد الفطور."]]};
+const EX_ATE=[
+{en:"chorba frik, kesra, dates",fr:"chorba frik, kesra, dattes",ar:"شوربة فريك، كسرة، تمر"},
+{en:"rice, chicken, mint tea",fr:"riz, poulet, thé à la menthe",ar:"أرز، دجاج، شاي بالنعناع"},
+{en:"loubia, bread, lben",fr:"loubia, pain, lben",ar:"لوبيا، خبز، لبن"}];
+
+/* ---------- Helpers & storage ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const LI={en:0,fr:1,ar:2};
+let lang=ls.get('gutdays-lang');
+if(!T[lang]){const n=(navigator.language||'').slice(0,2);lang=T[n]?n:'en'}
+const t=k=>T[lang][k];
+
+/* ---------- Entries & sync ----------
+   Symptoms, stool, stress and meal are stored as keys so they read in any language.
+   serverEntries = what the online store holds (cached on the phone);
+   pend = new entries not yet confirmed online; gutdays-del = deletions not yet confirmed. */
+const LEG={Bloating:'bloat',Cramps:'cramps',Gas:'gas',Diarrhoea:'diar',Constipation:'const',Urgency:'urg',Nausea:'naus',Tired:'tired'};
+const LEGS={Low:'low',Medium:'med',High:'high'};
+const day=n=>{const d=new Date();d.setDate(d.getDate()-n);return d.toISOString()};
+const newId=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const getJ=(k,d)=>{try{const v=JSON.parse(ls.get(k)||'null');return v==null?d:v}catch(e){return d}};
+const setJ=(k,v)=>ls.set(k,JSON.stringify(v));
+let serverEntries=getJ('gutdays',[]).filter(e=>!e.ex);
+let pend=getJ('gutdays-pend',[]);
+const legacy=serverEntries.filter(e=>!e.id);
+if(legacy.length){
+  pend=pend.concat(legacy.map(e=>({...e,id:newId(),syms:(e.syms||[]).map(s=>LEG[s]||s),stress:LEGS[e.stress]||e.stress||'low'})));
+  serverEntries=serverEntries.filter(e=>e.id);setJ('gutdays-pend',pend);setJ('gutdays',serverEntries);
+}
+const examples=()=>[
+{t:day(1),pain:3,syms:['bloat','cramps'],stool:'hard',meal:'dinner',exi:0,stress:'high',note:'',ex:true},
+{t:day(2),pain:1,syms:['gas'],stool:'normal',meal:'lunch',exi:1,stress:'low',note:'',ex:true},
+{t:day(3),pain:3,syms:['bloat','diar'],stool:'loose',meal:'lunch',exi:2,stress:'med',note:'',ex:true}];
+let entries=[];
+function compute(){
+  const dels=getJ('gutdays-del',[]);const sIds=new Set(serverEntries.map(e=>e.id));
+  const real=[...serverEntries.filter(e=>!dels.includes(e.id)),...pend.filter(e=>!sIds.has(e.id)&&!dels.includes(e.id))];
+  entries=real.length||ls.get('gutdays-noex')?real:examples();
+}
+compute();
+const ateOf=e=>e.ex?EX_ATE[e.exi][lang]:(e.ate||'');
+
+let db=null,syncState='syncWait',flushing=false,blocked=false;
+function setSync(s){syncState=s;const el=$('#sync');el.dataset.s=s;el.textContent=t(s)}
+async function flush(){
+  if(!db||flushing||blocked)return;flushing=true;
+  try{
+    for(const e of [...pend]){
+      try{await db.collection('entries').doc(e.id).set(e);pend=pend.filter(x=>x.id!==e.id);setJ('gutdays-pend',pend)}
+      catch(err){blocked=true;setSync(err&&err.code==='invalid_argument'?'syncRO':'syncErr');return}
+    }
+    for(const id of getJ('gutdays-del',[])){
+      try{await db.collection('entries').doc(id).delete();setJ('gutdays-del',getJ('gutdays-del',[]).filter(x=>x!==id))}
+      catch(err){blocked=true;setSync(err&&err.code==='invalid_argument'?'syncRO':'syncErr');return}
+    }
+  }finally{flushing=false}
+}
+async function initSync(){
+  setSync('syncWait');
+  let d=null;
+  try{d=window.claude&&window.claude.use?await window.claude.use('db'):null}catch(e){}
+  if(!d){setSync('syncOff');return}
+  db=d;
+  db.collection('foods').limit(1000).get().then(s=>{
+    s.docs.forEach(doc=>{const v=doc.data();if(v&&v.name&&v.lvl){const n=norm(v.name);FC[n]={lvl:v.lvl,notes:{...((FC[n]&&FC[n].notes)||{}),...(v.notes||{})}}}});
+    setJ('gutdays-foods',FC);renderChecks();
+  }).catch(()=>{});
+  db.collection('entries').orderBy('t','desc').limit(1000).onSnapshot(snap=>{
+    serverEntries=snap.docs.map(s=>({...s.data(),id:s.id}));
+    setJ('gutdays',serverEntries);
+    compute();renderList();buildFoodChips();
+    if(syncState==='syncWait')setSync('syncOn');
+    flush();
+  },()=>{if(syncState==='syncWait')setSync('syncOff')});
+}
+function addEntry(e){
+  e.id=newId();e.t=new Date().toISOString();
+  pend.push(e);setJ('gutdays-pend',pend);
+  compute();renderList();buildFoodChips();flush();
+}
+function removeEntry(id){
+  pend=pend.filter(x=>x.id!==id);setJ('gutdays-pend',pend);
+  if(serverEntries.some(x=>x.id===id)){const dl=getJ('gutdays-del',[]);dl.push(id);setJ('gutdays-del',dl)}
+  compute();renderList();buildFoodChips();flush();
+}
+
+/* ---------- Form state ---------- */
+let pain=null,stress='low',stool=null,meal=null;const picked=new Set();
+const mealNow=()=>{const h=new Date().getHours();return h<11?'bf':h<16?'lunch':h<19?'snack':'dinner'};
+const splitFoods=s=>s.split(/[,،]/).map(f=>f.trim()).filter(Boolean);
+
+/* ---------- Food check: rates each food she adds ----------
+   Known foods (the guide + the quick-tap buttons) answer instantly; anything else is asked
+   of Claude once, then remembered on the phone and in the shared store. */
+const DEF_NOTE_GUIDE={en:'See the food guide',fr:'Voir le guide alimentaire',ar:'انظري دليل الأطعمة'};
+const DEF=[['g'],['a',{en:'1 small piece',fr:'1 petit morceau',ar:'قطعة صغيرة'}],['a',{en:'1 slice',fr:'1 tranche',ar:'قطعة واحدة'}],
+['a',{en:'1 small bowl, no onion or garlic',fr:'1 petit bol, sans oignon ni ail',ar:'صحن صغير، بدون بصل وثوم'}],['a',{en:'1 small plate',fr:'1 petite assiette',ar:'صحن صغير'}],
+['g'],['g'],['g'],['x',DEF_NOTE_GUIDE],['g'],['a',{en:'1 cup a day',fr:'1 tasse par jour',ar:'فنجان واحد في اليوم'}],
+['r',{en:'Contains lactose',fr:'Contient du lactose',ar:'يحتوي على اللاكتوز'}],['r',{en:'High in FODMAPs',fr:'Riche en FODMAP',ar:'غني بالفودماب'}],['x',DEF_NOTE_GUIDE]];
+/* Built-in food list: [level, English, French, Arabic, other spellings (Darija etc.), note [en,fr,ar]] */
+const P1=['1 small piece','1 petit morceau','قطعة صغيرة'],SP=['1 small plate','1 petite assiette','صحن صغير'],LAC=['Contains lactose','Contient du lactose','يحتوي على اللاكتوز'],OG=['Often onion and garlic','Souvent oignon et ail','غالباً بصل وثوم'],HC=['½ cup','½ tasse','نصف كوب'];
+const FOODDB=[
+['g','rice','riz','أرز','rouz,roz'],['g','oats','flocons d\'avoine','شوفان','avoine,oat'],['g','quinoa','quinoa','كينوا',''],['g','polenta','polenta','بولنتا',''],
+['g','rice noodles','nouilles de riz','نودلز الأرز',''],['g','gluten-free bread','pain sans gluten','خبز بدون غلوتين',''],['g','popcorn','pop-corn','فشار',''],
+['a','bread','pain','خبز','khobz,baguette,pain blanc',['1 slice','1 tranche','قطعة واحدة']],['a','homemade bread','pain maison','خبز الدار','khobz eddar,khobz dar,matlou3,matlouh',P1],
+['a','kesra','kesra','كسرة','galette,kessra',P1],['a','couscous','couscous','كسكسي','seksou,kousksi,kouskous',SP],
+['a','pasta','pâtes','مقرونة','makarouna,spaghetti,macaroni,pates',['½ cup cooked','½ tasse cuite','نصف كوب مطبوخ']],
+['a','rechta','rechta','رشتة','',['1 small plate, no onion','1 petite assiette, sans oignon','صحن صغير، بدون بصل']],['a','trida','trida','تريدة','',SP],
+['a','msemen','msemen','مسمن','msemmen',P1],['a','baghrir','baghrir','بغرير','beghrir',['1 piece, no honey','1 pièce, sans miel','قطعة واحدة، بدون عسل']],
+['r','mhadjeb','mhadjeb','محاجب','mahdjouba,mhajeb,mahjouba',['Wheat with onion filling','Blé et farce à l\'oignon','قمح وحشوة بالبصل']],
+['a','semolina','semoule','سميد','smid',['Small portion','Petite portion','كمية صغيرة']],['a','frik','frik','فريك','',['1 small bowl','1 petit bol','صحن صغير']],
+['r','barley','orge','شعير','',['High in fructans','Riche en fructanes','غني بالفركتان']],['r','dchicha','dchicha','دشيشة','dchich',['Barley, high in fructans','Orge, riche en fructanes','شعير غني بالفركتان']],
+['r','wheat bran','son de blé','نخالة','bran,son',['Often worsens bloating','Aggrave souvent les ballonnements','غالباً تزيد الانتفاخ']],
+['a','cake','gâteau','كيك','gateau',['1 small slice','1 petite part','قطعة صغيرة']],['a','biscuits','biscuits','بسكويت','gateaux secs,biscuit',['2 biscuits','2 biscuits','قطعتان']],
+['r','pizza','pizza','بيتزا','',['Wheat, garlic, onion, cheese','Blé, ail, oignon, fromage','قمح وثوم وبصل وجبن']],
+['a','karantika','karantika','كرنتيكا','garantita,calentica',['1 small piece (chickpea flour)','1 petit morceau (farine de pois chiche)','قطعة صغيرة (دقيق الحمص)']],
+['a','chorba','chorba','شوربة','chorba frik,jari,djari,soupe',['1 small bowl, no onion or garlic','1 petit bol, sans oignon ni ail','صحن صغير، بدون بصل وثوم']],
+['r','harira','harira','حريرة','hrira',['Legumes and onion','Légumineuses et oignon','بقوليات وبصل']],
+['r','loubia','loubia','لوبيا','haricots blancs,white beans',['Beans are a strong trigger','Les haricots déclenchent souvent','الفاصوليا من أقوى المسببات']],
+['r','lentils','lentilles','عدس','adess,ades,3des',['Canned and rinsed: ½ cup is ok','En boîte et rincées : ½ tasse ok','المعلّب المغسول: نصف كوب مقبول']],
+['r','chickpeas','pois chiches','حمص','hommos,homos',['Canned and rinsed: ¼ cup is ok','En boîte et rincés : ¼ tasse ok','المعلّب المغسول: ربع كوب مقبول']],
+['r','hummus','houmous','حمص بالطحينة','',['Chickpeas and garlic','Pois chiches et ail','حمص وثوم']],['r','fava beans','fèves','فول','foul,doubara,feves'],['r','dried beans','haricots secs','فاصوليا','beans'],
+['x','chakchouka','chakchouka','شكشوكة','tchoutchouka,shakshuka',['Fine without onion and garlic','Bien sans oignon ni ail','مناسبة بدون بصل وثوم']],
+['a','chakhchoukha','chakhchoukha','شخشوخة','',['Small plate, no onion or chickpeas','Petite assiette, sans oignon ni pois chiches','صحن صغير، بدون بصل وحمص']],
+['x','tajine','tajine','طاجين','tadjine,tagine',['Avoid onion, garlic and prunes','Évitez oignon, ail et pruneaux','تجنّبي البصل والثوم والبرقوق']],
+['x','tajine zitoune','tajine zitoune','طاجين الزيتون','',['Fine without onion and mushrooms','Bien sans oignon ni champignons','مناسب بدون بصل وفطر']],
+['r','tajine lahlou','tajine lahlou','طاجين الحلو','lham lahlou,lahlou',['Prunes and raisins','Pruneaux et raisins secs','برقوق وزبيب']],
+['r','mtewem','mtewem','مثوم','mthewem,mtouem',['Lots of garlic','Beaucoup d\'ail','ثوم كثير']],['x','dolma','dolma','دولمة','',OG],
+['r','bourek','bourek','بوراك','brik,bourak,borek',['Fried, often with onion','Frit, souvent avec oignon','مقلي وغالباً بالبصل']],['x','kefta','kefta','كفتة','kafta',OG],
+['r','merguez','merguez','مرقاز','',['Garlic, fat and spice','Ail, gras et épices','ثوم ودسم وتوابل']],
+['x','cachir','cachir','كاشير','kachir',['Check the label for garlic or onion','Vérifiez l\'ail ou l\'oignon sur l\'étiquette','تحقّقي من الثوم أو البصل في الملصق']],
+['x','salad','salade','سلطة','slata',['Depends on the ingredients','Selon les ingrédients','حسب المكونات']],
+['x','mechouia','salade méchouia','سلطة مشوية','mechwia,slata mechouia',['Fine without garlic','Bien sans ail','مناسبة بدون ثوم']],
+['a','fries','frites','بطاطا مقلية','frite,chips',['Fried: small portion','Frit : petite portion','مقلية: كمية صغيرة']],
+['g','omelette','omelette','عجة','omelet'],['g','grilled meat','viande grillée','لحم مشوي','mechoui,mechwi,brochette,brochettes',['No garlic marinade','Sans marinade à l\'ail','بدون تتبيلة بالثوم']],
+['r','garlic','ail','ثوم','thoum,toum'],['r','onion','oignon','بصل','bsel,besla,oignons'],
+['g','garlic-infused oil','huile à l\'ail','زيت بنكهة الثوم','garlic oil',['Good garlic substitute','Bon substitut à l\'ail','بديل جيد للثوم']],
+['g','chicken','poulet','دجاج','djaj,djej'],['g','beef','bœuf','لحم بقر','boeuf,lham bagri'],['g','lamb','agneau','لحم غنم','kebch,lham ghanmi,mouton'],['g','meat','viande','لحم','lham,l7am'],
+['g','turkey','dinde','ديك رومي',''],['g','liver','foie','كبدة','kebda,kabda'],['g','fish','poisson','سمك','hout,7out'],['g','sardines','sardines','سردين','sardine'],
+['g','tuna','thon','تونة','ton'],['g','shrimp','crevettes','قمبري','crevette'],['g','eggs','œufs','بيض','oeuf,oeufs,egg,bid'],['g','firm tofu','tofu ferme','توفو','tofu'],
+['r','milk','lait','حليب','hlib,7lib',LAC],['g','lactose-free milk','lait sans lactose','حليب بدون لاكتوز',''],['r','lben','lben','لبن','leben,lait fermente,ben',LAC],
+['r','raib','raïb','رايب','rayeb',LAC],['r','yogurt','yaourt','ياغورت','yoghurt,yaourt,danone,yogourt',['Try lactose-free yogurt','Essayez le yaourt sans lactose','جربي الياغورت بدون لاكتوز']],
+['g','lactose-free yogurt','yaourt sans lactose','ياغورت بدون لاكتوز',''],['g','hard cheese','fromage à pâte dure','جبن صلب','gouda,edam,cheddar,parmesan,emmental,fromage rouge'],
+['g','mozzarella','mozzarella','موزاريلا',''],['g','camembert','camembert','كامومبير','brie'],['g','feta','feta','فيتا',''],
+['r','fresh cheese','fromage frais','جبن طري','jben,ricotta',LAC],['a','cheese spread','fromage fondu','جبن مثلثات','la vache qui rit,vache qui rit',['1 portion','1 portion','قطعة واحدة']],
+['g','butter','beurre','زبدة','zebda'],['g','smen','smen','سمن',''],['a','cream','crème fraîche','كريمة','creme',['2 tablespoons','2 cuillères à soupe','ملعقتان كبيرتان']],
+['r','ice cream','glace','مثلجات','creme glacee,glace',LAC],['r','mhalbi','mhalbi','محلبي','mahalabia,mhalbia',['Made with milk','À base de lait','مصنوع بالحليب']],
+['r','flan','flan','فلان','creme caramel',['Made with milk','À base de lait','مصنوع بالحليب']],['g','almond milk','lait d\'amande','حليب اللوز',''],
+['r','soy milk','lait de soja','حليب الصويا','',['Made from whole soybeans','À base de soja entier','من حبوب الصويا الكاملة']],['a','oat milk','lait d\'avoine','حليب الشوفان','',HC],
+['g','carrots','carottes','جزر','zroudiya,zrodiya,carotte,carrot'],['g','courgette','courgette','قرعة','zucchini,qar3a,guer3a,kar3a'],['g','tomatoes','tomates','طماطم','tomate,tomato,tomatich,tmatem'],
+['g','cucumber','concombre','خيار','khiyar,khyar'],['g','lettuce','laitue','خس','khas,salade verte'],['g','spinach','épinards','سبانخ','sabanikh,epinard'],
+['g','green beans','haricots verts','لوبيا خضراء','loubia khadra'],['g','red pepper','poivron rouge','فلفل أحمر','felfel,poivron,peppers'],['a','green pepper','poivron vert','فلفل أخضر','',HC],
+['g','chili','piment','فلفل حار','piment fort,harr',['Small amount if spice bothers you','Un peu si le piquant vous gêne','قليل إذا أزعجك الحار']],
+['g','aubergine','aubergine','باذنجان','eggplant,badendjel,bedenjal',['1 cup','1 tasse','كوب واحد']],['g','potatoes','pommes de terre','بطاطا','batata,patate,potato,pomme de terre'],
+['a','sweet potato','patate douce','بطاطا حلوة','',HC],['a','pumpkin','potiron','قرعة حمراء','citrouille,kabouya,courge',HC],['g','turnip','navet','لفت','left'],
+['g','radish','radis','فجل',''],['g','cabbage','chou','كرنب','kromb,chou blanc',['1 cup','1 tasse','كوب واحد']],['g','chard','blettes','سلق','selk,selq,bette'],
+['g','olives','olives','زيتون','zitoun,zaytoun,olive'],['g','spring onion greens','vert d\'oignon nouveau','الجزء الأخضر من البصل الأخضر','green onion,cebette',['Green part only','Partie verte seulement','الجزء الأخضر فقط']],
+['a','celery','céleri','كرافس','krafes,karafes',['1 small stick','1 petite branche','عود صغير']],['a','sweet corn','maïs','ذرة','mais,corn',['½ cob','½ épi','نصف كوز']],
+['a','peas','petits pois','جلبانة','djelbana,jelbana,petit pois',['¼ cup','¼ tasse','ربع كوب']],['a','broccoli','brocoli','بروكلي','',['Heads, ¾ cup','Têtes, ¾ tasse','الرؤوس، ¾ كوب']],
+['a','beetroot','betterave','شمندر','barba',['2 slices','2 tranches','شريحتان']],['a','okra','gombo','بامية','bamia,gnaouia',HC],
+['a','fennel','fenouil','بسباس','besbes,bisbas',['½ cup bulb','½ tasse de bulbe','نصف كوب']],['r','cauliflower','chou-fleur','قرنبيط','chiflor,chou fleur'],
+['r','mushrooms','champignons','فطر','champignon,mushroom'],['r','artichoke','artichaut','خرشف','khorchef,qarnoun'],['r','asparagus','asperges','هليون',''],
+['r','leek','poireau','كراث','poireaux',['Green leaves are fine','Les feuilles vertes passent','الأوراق الخضراء مناسبة']],
+['g','ginger','gingembre','زنجبيل','skinjbir,zanjabil'],['g','coriander','coriandre','كسبر','kasbour,kosbor,qasbour'],['g','parsley','persil','معدنوس','maadnous,ma3dnous'],
+['g','mint','menthe','نعناع','naana,na3na3'],['g','cumin','cumin','كمون','kamoun'],['g','paprika','paprika','فلفل أحمر حلو','felfel ahmar'],['g','cinnamon','cannelle','قرفة','karfa,9arfa'],
+['g','turmeric','curcuma','كركم',''],['g','black pepper','poivre','فلفل أسود',''],
+['x','ras el hanout','ras el hanout','رأس الحانوت','ras hanout',['Check for garlic or onion powder','Vérifiez ail ou oignon en poudre','تحقّقي من مسحوق الثوم أو البصل']],
+['r','harissa','harissa','هريسة','',['Garlic and very spicy','Ail et très piquant','ثوم وحار جداً']],['g','tomato paste','concentré de tomate','معجون الطماطم','concentre,salsa'],
+['g','mayonnaise','mayonnaise','مايونيز','mayo'],['g','mustard','moutarde','خردل',''],['a','ketchup','ketchup','كاتشب','',['1 tablespoon','1 cuillère à soupe','ملعقة كبيرة']],
+['g','soy sauce','sauce soja','صلصة الصويا',''],['g','vinegar','vinaigre','خل','khal'],['g','olive oil','huile d\'olive','زيت الزيتون','zit zitoun'],['g','oil','huile','زيت','zit'],
+['g','salt','sel','ملح','mel7,melh'],['g','sugar','sucre','سكر','sokkar,sekker'],['g','jam','confiture','مربى','',['2 tablespoons','2 cuillères à soupe','ملعقتان كبيرتان']],
+['r','honey','miel','عسل','3sel,aasel,assel'],['r','agave syrup','sirop d\'agave','شراب الأغاف','agave'],
+['g','banana','banane','موز','mouz',['Firm, not too ripe','Ferme, pas trop mûre','غير ناضج كثيراً']],['g','orange','orange','برتقال','tchina,china,bortokal,oranges'],
+['g','clementine','clémentine','مندرين','mandarine,mandarina,clementines'],['g','grapes','raisin','عنب','3neb,aneb,raisins frais'],['g','strawberries','fraises','فراولة','fraise,frez,strawberry'],
+['g','kiwi','kiwi','كيوي',''],['g','lemon','citron','ليمون','lim'],['g','pineapple','ananas','أناناس',''],['g','melon','melon','بطيخ أصفر','bettikh,betikh',['1 cup','1 tasse','كوب واحد']],
+['g','blueberries','myrtilles','توت أزرق',''],['g','raspberries','framboises','توت العليق',''],['g','papaya','papaye','بابايا',''],['g','passion fruit','fruit de la passion','فاكهة العاطفة',''],
+['a','pomegranate','grenade','رمان','romman,roman',['¼ cup seeds','¼ tasse de grains','ربع كوب حبوب']],['a','grapefruit','pamplemousse','ليمون هندي','',['½ fruit','½ fruit','نصف حبة']],
+['a','avocado','avocat','أفوكادو','',['⅛ fruit','⅛ de fruit','ثُمن حبة']],['a','coconut','noix de coco','جوز الهند','coco',['¼ cup','¼ tasse','ربع كوب']],
+['r','apple','pomme','تفاح','teffah,tefah,pommes,apples'],['r','pear','poire','إجاص','landjas,lanjas,pears'],['r','watermelon','pastèque','دلاع','dellaa,della3,dalla3'],
+['r','mango','mangue','مانجو',''],['r','peach','pêche','خوخ','khokh,peches,peaches'],['r','apricot','abricot','مشمش','mechmach,mechmech,apricots'],['r','plum','prune','برقوق','berkouk,barqouq'],
+['r','cherries','cerises','كرز','cerise,cherry'],['r','nectarine','nectarine','نكتارين',''],['r','figs','figues','كرموس','karmous,figue,tin,fig'],
+['r','dates','dattes','تمر','tmer,tmar,deglet nour,datte,date',['1 date at most','1 datte au maximum','تمرة واحدة على الأكثر']],['r','raisins','raisins secs','زبيب','zbib'],
+['r','prunes','pruneaux','برقوق مجفف',''],['r','dried apricots','abricots secs','مشمش مجفف',''],['r','persimmon','kaki','كاكي',''],['r','blackberries','mûres','توت أسود',''],
+['x','prickly pear','figue de barbarie','هندي','karmous ennsara,hendi',['Not well studied; try a small amount','Peu étudiée ; essayez une petite quantité','غير مدروسة جيداً؛ جربي كمية صغيرة']],
+['g','peanuts','cacahuètes','كاوكاو','kawkaw,cacahuete,arachide,peanut'],['g','walnuts','noix','جوز','djouz,jouz'],['g','pecans','noix de pécan','بيكان',''],['g','macadamia','macadamia','مكاديميا',''],
+['g','pumpkin seeds','graines de courge','بذور القرع',''],['g','sunflower seeds','graines de tournesol','زريعة','zriaa,zri3a,zeri3a',['2 tablespoons','2 cuillères à soupe','ملعقتان كبيرتان']],
+['g','sesame','sésame','جلجلان','djeldjlane,jeljlan,tahini'],['g','chia seeds','graines de chia','بذور الشيا','chia'],
+['a','almonds','amandes','لوز','louz,amande',['10 almonds','10 amandes','10 حبات']],['a','hazelnuts','noisettes','بندق','bondok,noisette',['10 hazelnuts','10 noisettes','10 حبات']],
+['r','cashews','noix de cajou','كاجو','cajou'],['r','pistachios','pistaches','فستق','fostok,pistache'],
+['r','makroud','makroud','مقروط','makrout,maqrout',['Dates and honey','Dattes et miel','تمر وعسل']],['a','zlabia','zlabia','زلابية','zlabiya,zalabia',['1 piece; fried','1 pièce ; frit','قطعة واحدة؛ مقلية']],
+['r','baklawa','baklawa','بقلاوة','baklava',['Honey and nuts','Miel et fruits secs','عسل ومكسرات']],['a','kalb el louz','qalb el louz','قلب اللوز','kelb elouz,qalb elouz,kalb elouz',P1],
+['r','griwech','griwech','قريوش','grioueche,griwach',['Fried with honey','Frit au miel','مقلي بالعسل']],['a','chamia','chamia','شامية','halwa,halva,halwat turk',P1],
+['r','tamina','tamina','طمينة','',['Honey and butter','Miel et beurre','عسل وزبدة']],['a','chocolate','chocolat','شوكولاتة','',['A few squares','Quelques carrés','قطع قليلة']],
+['r','sugar-free sweets','bonbons sans sucre','حلوى بدون سكر','chewing gum,gum,chewing-gum,3elk,elk',['Sorbitol and other polyols','Sorbitol et autres polyols','السوربيتول وغيره']],
+['g','water','eau','ماء','lma,el ma'],['g','mint tea','thé à la menthe','شاي بالنعناع','atay bel naana,the a la menthe'],['g','tea','thé','شاي','the,atay,tay',['Not too strong','Pas trop fort','ليس ثقيلاً']],
+['g','green tea','thé vert','شاي أخضر',''],['a','coffee','café','قهوة','kahwa,qahwa,9ahwa,cafe',['1 cup a day','1 tasse par jour','فنجان واحد في اليوم']],
+['r','chamomile tea','camomille','بابونج','babounj,chamomile'],['r','fennel tea','tisane de fenouil','شاي البسباس',''],
+['r','juice','jus','عصير','3asir,assir,jus de fruit',['Concentrated fruit sugar','Sucre de fruit concentré','سكر الفاكهة المركز']],['a','orange juice','jus d\'orange','عصير برتقال','',['½ glass','½ verre','نصف كأس']],
+['r','fizzy drinks','sodas','مشروبات غازية','soda,gazouz,gazous,coca,coca cola,selecto,hamoud,hamoud boualem,pepsi,fanta,limonade',['Gas and sweeteners','Gaz et édulcorants','غاز ومحليات']],
+['r','energy drinks','boissons énergisantes','مشروبات الطاقة','red bull'],['a','coconut water','eau de coco','ماء جوز الهند','',['½ glass','½ verre','نصف كأس']]
+];
+const norm=s=>String(s).toLowerCase().replace(/œ/g,'oe').normalize('NFD').replace(/\p{M}/gu,'').replace(/\(.*?\)/g,' ').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/[^\p{L}\p{N}\s'-]/gu,' ').replace(/(^|\s)[وبفك]?ال(?=\S\S)/g,'$1').replace(/\s+/g,' ').trim();
+const hashId=s=>{let h=5381;for(const c of s)h=(Math.imul(h,33)^c.codePointAt(0))>>>0;return 'f'+h.toString(36)};
+const LOCAL={};
+FOODDB.forEach(([lvl,en,fr,ar,alt,note])=>{
+  const notes=note?{en:note[0],fr:note[1],ar:note[2]}:{};
+  [en,fr,ar,...(alt?alt.split(','):[])].map(norm).filter(Boolean).forEach(k=>{if(!LOCAL[k])LOCAL[k]={lvl,notes}});
+});
+Object.entries(FOODS).forEach(([k,arr])=>arr.forEach(tr=>{
+  const notes={};
+  if(k==='a')['en','fr','ar'].forEach((L,i)=>{const m=tr[i].match(/\((.*?)\)/);if(m)notes[L]=m[1]});
+  tr.forEach(name=>name.replace(/\(.*?\)/g,'').split(/,|،|\sand\s|\set\s/).map(norm).filter(x=>x.length>1).forEach(x=>{if(!LOCAL[x])LOCAL[x]={lvl:k,notes}}));
+}));
+['en','fr','ar'].forEach(L=>T[L].defFoods.forEach((f,i)=>{const [lvl,notes]=DEF[i];LOCAL[norm(f)]={lvl,notes:notes||{}}}));
+let FC=getJ('gutdays-foods',{});
+const LOCAL_KEYS=Object.keys(LOCAL).filter(k=>k.length>1).sort((a,b)=>b.length-a.length);
+const RANK={r:4,a:3,x:2,u:1,g:0};
+function lookup(f){
+  const n=norm(f);if(!n)return null;
+  for(const v of [n,n+'s',n.replace(/s$/,''),n.replace(/es$/,'')]){if(FC[v])return FC[v];if(LOCAL[v])return LOCAL[v]}
+  // A dish or phrase: find the known foods inside it (longest first) and report the worst one.
+  let s=' '+n+' ';const hits=[];
+  for(const k of LOCAL_KEYS){if(s.includes(' '+k+' ')){hits.push(k);s=s.split(' '+k+' ').join('  ')}}
+  if(!hits.length)return null;
+  const worst=hits.reduce((w,k)=>RANK[LOCAL[k].lvl]>RANK[LOCAL[w].lvl]?k:w,hits[0]);
+  if(hits.length===1)return LOCAL[worst];
+  const lvl=LOCAL[worst].lvl,bad=hits.filter(k=>LOCAL[k].lvl===lvl);
+  return {lvl,notes:{[lang]:lvl==='g'?'':t('contains')+' '+bad.join(lang==='ar'?'، ':', ')}};
+}
+const checking=new Set(),failed=new Set(),queued=new Set(),netFail=new Set();
+// Outside Claude, unknown foods are checked through the app's own server (window.FOOD_API).
+async function askFoodApi(names){
+  const r=await fetch(window.FOOD_API,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({foods:names,lang})});
+  if(!r.ok)throw {code:r.status===429?'rate_limited':'upstream_error'};
+  return r.json();
+}
+let sampleFn,sampleOff=false,busy=false;
+const LNAME={en:'English',fr:'French',ar:'simple Arabic'};
+const foodPrompt=names=>`You help a woman in Algeria who has mixed-type IBS follow the Monash University low-FODMAP approach.
+For each food or dish below (written in English, French, Arabic or Algerian Darija, in Latin or Arabic script), give:
+- "level": "g" if low-FODMAP in a normal portion, "a" if fine only in a small portion, "r" if high-FODMAP or a common IBS trigger, "x" if it depends on the recipe or variety, "u" if it is not a food or you cannot tell.
+- "note": at most 12 words in ${LNAME[lang]}: the safe portion, or the main trigger (for example garlic, onion, lactose, wheat, fat).
+Foods: ${JSON.stringify(names)}
+Reply with only a JSON array with one object per food, in the same order: [{"food":"...","level":"g","note":"..."}]`;
+function saveFood(n,lvl,note){
+  const notes={...((FC[n]&&FC[n].notes)||{})};if(note)notes[lang]=note;
+  FC[n]={lvl,notes};setJ('gutdays-foods',FC);
+  if(db)db.collection('foods').doc(hashId(n)).set({name:n,lvl,notes}).catch(()=>{});
+}
+function rowHTML(f){
+  const r=lookup(f),n=norm(f);
+  const L={g:t('lanes').g[0],a:t('lanes').a[0],r:t('lanes').r[0],x:t('lvlX'),u:t('lvlU')};
+  let cls='p',label='',note='';
+  if(r){cls=r.lvl;label=L[r.lvl]||'';note=(r.notes&&r.notes[lang])||''}
+  else if(checking.has(n))label=t('checking');
+  else if(netFail.has(n)){cls='u';label=t('noNet')}
+  else if(failed.has(n)){cls='u';label=t('lvlU')}
+  return `<li class="chk ${cls}"><span class="cdot"></span><span class="cname">${esc(f)}</span><span class="clvl">${esc(label)}</span>${note?`<span class="cnote">${esc(note)}</span>`:''}</li>`;
+}
+function renderChecks(){
+  const box=$('#checks');if(box)box.innerHTML=splitFoods($('#ate').value).map(rowHTML).join('');
+  const qc=$('#qcheck');
+  if(qc){const q=$('#q').value.trim(),n=norm(q);qc.innerHTML=q&&(lookup(q)||checking.has(n)||failed.has(n))?rowHTML(q):''}
+}
+async function checkNames(list){
+  const names=[...new Set(list.map(norm))].filter(n=>n&&!lookup(n)&&!failed.has(n)&&!checking.has(n)).slice(0,12);
+  if(!names.length){renderChecks();return}
+  if(busy){names.forEach(n=>queued.add(n));return}
+  busy=true;names.forEach(n=>netFail.delete(n));
+  if(sampleFn===undefined){try{sampleFn=window.claude&&window.claude.use?await window.claude.use('sample'):null}catch(e){sampleFn=null}}
+  if((!sampleFn&&!window.FOOD_API)||sampleOff){names.forEach(n=>failed.add(n));busy=false;renderChecks();return}
+  names.forEach(n=>checking.add(n));renderChecks();
+  let netErr=false;
+  try{
+    const res=sampleFn?await sampleFn.json(foodPrompt(names),{modelTier:'quick'}):await askFoodApi(names);
+    (Array.isArray(res)?res:[]).forEach((r,i)=>{
+      const n=names[i];if(!n||!r||typeof r!=='object')return;
+      const lvl=['g','a','r','x','u'].includes(r.level)?r.level:'u';
+      saveFood(n,lvl,String(r.note||'').slice(0,160));
+    });
+  }catch(e){
+    if(['not_granted','sampling_disabled','not_declared','capability_disabled','capability_removed'].includes(e&&e.code))sampleOff=true;
+    else netErr=true;
+  }finally{
+    names.forEach(n=>{checking.delete(n);if(!lookup(n))(netErr?netFail:failed).add(n)});
+    busy=false;renderChecks();
+    if(queued.size){const q=[...queued];queued.clear();checkNames(q)}
+  }
+}
+const checkFoods=()=>checkNames(splitFoods($('#ate').value));
+
+function buildFoodChips(){
+  const counts={};
+  entries.filter(e=>!e.ex).forEach(e=>splitFoods(e.ate||'').forEach(f=>{const k=f.toLowerCase();counts[k]=(counts[k]||0)+1}));
+  const mine=Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
+  const list=[...new Set([...mine.slice(0,10),...t('defFoods')])].slice(0,16);
+  const box=$('#foodChips');box.innerHTML='';
+  list.forEach(f=>{const b=document.createElement('button');b.type='button';b.className='chip';b.textContent=f;
+    b.onclick=()=>{const items=splitFoods($('#ate').value);const i=items.findIndex(x=>x.toLowerCase()===f.toLowerCase());
+      if(i>=0)items.splice(i,1);else items.push(f);
+      $('#ate').value=items.join(lang==='ar'?'، ':', ');syncFoodChips();checkFoods()};
+    box.append(b)});
+  syncFoodChips();
+}
+function syncFoodChips(){
+  const cur=new Set(splitFoods($('#ate').value).map(f=>f.toLowerCase()));
+  [...$('#foodChips').children].forEach(b=>b.setAttribute('aria-pressed',cur.has(b.textContent.toLowerCase())));
+  renderChecks();
+}
+
+function buildForm(){
+  buildFoodChips();
+  $('#stool').innerHTML='';
+  Object.entries(t('stool')).forEach(([k,l])=>{const b=document.createElement('button');b.type='button';b.className='chip';b.dataset.k=k;b.textContent=l;b.setAttribute('aria-pressed',stool===k);b.onclick=()=>{stool=stool===k?null:k;[...$('#stool').children].forEach(c=>c.setAttribute('aria-pressed',c.dataset.k===stool))};$('#stool').append(b)});
+  $('#pain').innerHTML='';
+  t('pain').forEach((l,i)=>{const b=document.createElement('button');b.type='button';b.innerHTML=`<strong>${i}</strong><small>${l}</small>`;b.setAttribute('aria-pressed',pain===i);b.onclick=()=>{pain=i;[...$('#pain').children].forEach((c,j)=>c.setAttribute('aria-pressed',j===i))};$('#pain').append(b)});
+  $('#sym').innerHTML='';
+  Object.entries(t('syms')).forEach(([k,l])=>{const b=document.createElement('button');b.type='button';b.className='chip';b.textContent=l;b.setAttribute('aria-pressed',picked.has(k));b.onclick=()=>{picked.has(k)?picked.delete(k):picked.add(k);b.setAttribute('aria-pressed',picked.has(k))};$('#sym').append(b)});
+  $('#stress').innerHTML='';
+  Object.entries(t('stress')).forEach(([k,l])=>{const b=document.createElement('button');b.type='button';b.className='chip';b.dataset.k=k;b.textContent=l;b.setAttribute('aria-pressed',stress===k);b.onclick=()=>{stress=k;[...$('#stress').children].forEach(c=>c.setAttribute('aria-pressed',c.dataset.k===k))};$('#stress').append(b)});
+}
+
+function renderList(){
+  const list=$('#list');list.innerHTML='';
+  const sorted=[...entries].sort((a,b)=>b.t.localeCompare(a.t));
+  if(!sorted.length)list.innerHTML=`<p class="hint">${t('empty')}</p>`;
+  sorted.slice(0,40).forEach(e=>{
+    const cls=e.pain<=1?'d-low':e.pain===2?'d-mid':'d-high';
+    let d;try{d=new Date(e.t).toLocaleDateString(t('locale'),{weekday:'short',day:'numeric',month:'short'})}catch(_){d=String(e.t).slice(0,10)}
+    const sy=(e.syms||[]).map(k=>t('syms')[k]||k).join(lang==='ar'?'، ':', ');
+    const when=[d];if(e.meal&&t('meals')[e.meal])when.push(t('meals')[e.meal]);
+    if(e.stress)when.push(`${t('stressWord')}: ${t('stress')[e.stress]||e.stress}`);
+    const el=document.createElement('div');el.className='entry';
+    el.innerHTML=`<div class="dot ${cls}">${e.pain}</div><div class="when">${esc(when.join(' · '))}${e.ex?`<span class="tag">${t('example')}</span>`:''}</div><div class="what"><strong>${esc(sy||t('noSym'))}</strong>${e.stool?' · '+esc(t('stool')[e.stool]||''):''}</div><div class="what hint">${t('ateLbl')}: ${esc(ateOf(e)||'—')}${e.note?' · '+esc(e.note):''}</div>`;
+    if(!e.ex){
+      const b=document.createElement('button');b.type='button';b.className='del';b.textContent=t('del');
+      b.onclick=()=>{
+        if(!b.classList.contains('sure')){b.classList.add('sure');b.textContent=t('delSure');setTimeout(()=>{b.classList.remove('sure');b.textContent=t('del')},4000);return}
+        removeEntry(e.id)};
+      el.append(b);
+    }
+    list.append(el);
+  });
+  $('#clearEx').hidden=!entries.some(e=>e.ex);
+  insight();
+}
+
+function insight(){
+  const bad={},good={};
+  entries.forEach(e=>ateOf(e).split(/[,،]/).map(f=>f.trim().toLowerCase()).filter(Boolean).forEach(f=>{const m=e.pain>=3?bad:good;m[f]=(m[f]||0)+1}));
+  const sus=Object.entries(bad).filter(([f,n])=>n>=(good[f]||0)+1).sort((a,b)=>b[1]-a[1]).slice(0,4).map(x=>x[0]);
+  const box=$('#insight');
+  if(entries.length<3){box.innerHTML=`<h3>${t('patterns')}</h3><p class="hint">${t('patternsEmpty')}</p>`;return}
+  box.innerHTML=`<h3>${t('badFoods')}</h3><p>${sus.length?sus.map(esc).join(lang==='ar'?'، ':', '):t('nothing')}</p><p class="hint">${t('clue')}</p>`;
+}
+
+function drawFoods(){
+  const q=$('#q').value.trim().toLowerCase();const i=LI[lang];
+  $('#lanes').innerHTML=Object.entries(FOODS).map(([k,arr])=>{
+    const it=arr.filter(x=>!q||x.join(' ').toLowerCase().includes(q));
+    if(q&&!it.length)return'';
+    const [h,d]=t('lanes')[k];
+    return `<div class="lane ${k}"><h3>${h}</h3><p class="hint">${d}</p><ul>${it.map(x=>`<li>${esc(x[i])}</li>`).join('')}</ul></div>`;
+  }).join('')||`<p class="hint">${t('notFound')}</p><ul class="checks" id="qcheck"></ul><button class="btn ghost" id="qbtn" type="button">${t('checkBtn')}</button>`;
+  const qb=$('#qbtn');if(qb)qb.onclick=()=>checkNames([$('#q').value]);
+  renderChecks();
+}
+
+function tips(sel,list,numbered,cls=''){
+  $(sel).innerHTML=list.map(([h,p],i)=>`<div class="tip ${cls}">${numbered?`<span class="n">${i+1}</span>`:'<span class="n"></span>'}<strong>${esc(h)}</strong><p>${esc(p)}</p></div>`).join('');
+}
+
+/* ---------- Apply language ---------- */
+function applyLang(){
+  const root=document.documentElement;
+  root.lang=lang;root.dir=lang==='ar'?'rtl':'ltr';
+  document.querySelectorAll('[data-t]').forEach(el=>el.textContent=t(el.dataset.t));
+  document.querySelectorAll('.langs button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.l===lang));
+  $('#note').placeholder=t('notePh');$('#q').placeholder=t('searchPh');
+  if(!timer){$('#orb').textContent=t('start');$('#bbtn').textContent=t('start')}else{$('#bbtn').textContent=t('stop')}
+  tips('#dishes',TIPS.dishes[lang],false,'dish');
+  tips('#relief',TIPS.relief[lang],true);
+  tips('#family',TIPS.family[lang],true);
+  tips('#mixed',TIPS.mixed[lang],true);
+  buildForm();renderList();drawFoods();
+  $('#toast').textContent='';
+  setSync(syncState);
+}
+document.querySelectorAll('.langs button').forEach(b=>b.onclick=()=>{lang=b.dataset.l;ls.set('gutdays-lang',lang);applyLang()});
+
+/* Tabs */
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  ['log','food','relief'].forEach(v=>$('#v-'+v).hidden=v!==b.dataset.v);
+  window.scrollTo(0,0);
+});
+
+/* Save */
+$('#save').onclick=()=>{
+  const toast=$('#toast');
+  if(pain===null){toast.className='toast err';toast.textContent=t('pickPain');return}
+  addEntry({pain,syms:[...picked],stool,ate:$('#ate').value.trim(),stress,note:$('#note').value.trim()});
+  pain=null;picked.clear();stress='low';stool=null;meal=null;$('#ate').value='';$('#note').value='';
+  buildForm();
+  toast.className='toast';toast.textContent=t('saved');
+  setTimeout(()=>toast.textContent='',3000);
+};
+$('#goodDay').onclick=()=>{
+  addEntry({pain:0,syms:[],stool:'normal',ate:'',stress:'low',note:'',meal:'day'});
+  $('#quickMsg').textContent=t('goodSaved');
+  setTimeout(()=>$('#quickMsg').textContent=t('quickQ'),3000);
+};
+$('#clearEx').onclick=()=>{ls.set('gutdays-noex','1');compute();renderList();buildFoodChips()};
+$('#q').oninput=drawFoods;
+$('#ate').oninput=()=>{syncFoodChips();if(/[,،]\s*$/.test($('#ate').value))checkFoods()};
+$('#ate').onchange=checkFoods;
+
+/* Breathing */
+let timer=null;
+$('#bbtn').onclick=()=>{
+  const orb=$('#orb');
+  if(timer){clearTimeout(timer);timer=null;orb.style.transform='scale(.6)';orb.textContent=t('start');$('#bbtn').textContent=t('start');return}
+  $('#bbtn').textContent=t('stop');
+  const inn=()=>{orb.style.transitionDuration='4s';orb.style.transform='scale(1)';orb.textContent=t('inn');timer=setTimeout(out,4000)};
+  const out=()=>{orb.style.transitionDuration='6s';orb.style.transform='scale(.6)';orb.textContent=t('out');timer=setTimeout(inn,6000)};
+  inn();
+};
+
+applyLang();
+initSync();
+</script>
+
+<script>
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
+</script>
+</body>
+</html>
